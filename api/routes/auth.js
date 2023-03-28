@@ -6,19 +6,19 @@ const jwt = require("jsonwebtoken");
 //REGISTER
 router.post("/register", async (req, res) => {
     const newUser = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: CryptoJS.AES.encrypt(
+        username: req.body.username,
+        email: req.body.email,
+        password: CryptoJS.AES.encrypt(
         req.body.password,
         process.env.PASS_SEC
-    ).toString(),
+        ).toString(),
     });
 
     try {
-    const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
+        const savedUser = await newUser.save();
+        res.status(201).json(savedUser);
     } catch (err) {
-    res.status(500).json(err);
+        res.status(500).json(err);
     }
 });
 
@@ -26,22 +26,22 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     try {
-    const user = await User.findOne({ username: req.body.username });
-    !user && res.status(401).json("Wrong credentials!");
+        const user = await User.findOne({ username: req.body.username });
+        !user && res.status(401).json("Wrong credentials!");
 
-    const hashedPassword = CryptoJS.AES.decrypt(
+        const hashedPassword = CryptoJS.AES.decrypt(
         user.password,
         process.env.PASS_SEC
-    );
-    const OriginalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
+        );
+        const OriginalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
 
-    OriginalPassword !== req.body.password &&
+        OriginalPassword !== req.body.password &&
         res.status(401).json("Wrong credentials!");
 
-    const accessToken = jwt.sign(
+        const accessToken = jwt.sign(
         {
-        id: user._id,
-        isAdmin: user.isAdmin,
+            id: user._id,
+            isAdmin: user.isAdmin,
         },
         process.env.JWT_SEC,
         {expiresIn:"3d"}
@@ -51,7 +51,7 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({...others, accessToken});
     } catch (err) {
-    res.status(500).json(err);
+        res.status(500).json(err);
     }
 });
 
